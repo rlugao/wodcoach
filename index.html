@@ -410,6 +410,9 @@ header {
   <button class="tab" onclick="switchTab('tecnofit')" id="tab-tecnofit">
     <span class="tab-icon">🏋️</span> Tecnofit
   </button>
+  <button class="tab" onclick="switchTab('config')" id="tab-config">
+    <span class="tab-icon">⚙️</span> Config
+  </button>
 </div>
 
 <!-- ══════════════ CHAT PANEL ══════════════ -->
@@ -635,6 +638,45 @@ Resultado: completo, 18/20 rounds"></textarea>
   </div>
 </div>
 
+
+<!-- ══════════════ CONFIG PANEL ══════════════ -->
+<div class="panel" id="panel-config">
+  <div class="integration-panel">
+    <h2>⚙️ CONFIGURAÇÕES</h2>
+    <p class="subtitle">Configure sua chave API para ativar o coach de IA.</p>
+
+    <div class="integration-card">
+      <div class="integration-card-header">
+        <div class="int-logo" style="background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.3);font-size:24px;">⚡</div>
+        <div class="int-info">
+          <h3>Chave API Anthropic</h3>
+          <p>Obtida em console.anthropic.com → API Keys</p>
+        </div>
+      </div>
+
+      <label class="form-label">Cole sua chave API aqui</label>
+      <input class="form-input" id="config-api-key" type="password" 
+        placeholder="sk-ant-api03-..." 
+        style="font-family:'JetBrains Mono',monospace;letter-spacing:1px;">
+      
+      <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;">
+        <button class="btn btn-accent" onclick="saveConfigKey()" style="flex:1;">✅ Salvar e Ativar Coach</button>
+        <button class="btn btn-outline btn-sm" onclick="toggleKeyVisibility()">👁 Mostrar/Ocultar</button>
+      </div>
+
+      <div id="config-status" style="margin-top:14px;display:none;"></div>
+
+      <div class="info-box" style="margin-top:20px;">
+        <strong>Como obter sua chave:</strong><br><br>
+        <div class="step"><div class="step-num">1</div><div>Acesse <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a></div></div>
+        <div class="step"><div class="step-num">2</div><div>Clique em <strong>"+ Create Key"</strong></div></div>
+        <div class="step"><div class="step-num">3</div><div>Copie a chave gerada (começa com <strong>sk-ant-</strong>)</div></div>
+        <div class="step"><div class="step-num">4</div><div>Cole no campo acima e clique em <strong>"Salvar e Ativar"</strong></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -655,6 +697,40 @@ const state = {
 };
 
 // Persist Strava tokens
+
+function saveConfigKey() {
+  const key = document.getElementById('config-api-key').value.trim();
+  const status = document.getElementById('config-status');
+  
+  if(!key.startsWith('sk-ant-')) {
+    status.style.display = 'block';
+    status.innerHTML = '<div style="color:var(--red);font-size:13px;">⚠️ Chave inválida. Deve começar com sk-ant-</div>';
+    return;
+  }
+  
+  localStorage.setItem('wc_api_key', key);
+  status.style.display = 'block';
+  status.innerHTML = '<div style="color:var(--green);font-size:13px;">✓ Chave salva! Ativando coach...</div>';
+  
+  setTimeout(async () => {
+    switchTab('chat');
+    document.getElementById('chat-messages').innerHTML = '';
+    showTyping();
+    try {
+      const r = await callClaude('Olá! Me apresente brevemente como WodCoach e mencione as 3 integrações: Strava OAuth, Apple Health e Tecnofit.');
+      removeTyping(); appendMsg('coach', r, true);
+    } catch(e) {
+      removeTyping();
+      appendMsg('coach', '⚠️ Chave inválida ou sem créditos. Verifique em console.anthropic.com', false);
+    }
+  }, 800);
+}
+
+function toggleKeyVisibility() {
+  const field = document.getElementById('config-api-key');
+  field.type = field.type === 'password' ? 'text' : 'password';
+}
+
 function saveStravaState() {
   localStorage.setItem('wc_strava', JSON.stringify(state.strava));
 }
@@ -1088,18 +1164,21 @@ async function activateCoach() {
 // ═══════════════════════════════════════════════
 async function init() {
   loadStravaState();
-  if(!getApiKey()) {
-    showApiKeySetup();
+  // Load saved key into config field
+  const savedKey = localStorage.getItem('wc_api_key') || '';
+  const keyField = document.getElementById('config-api-key');
+  if(keyField && savedKey) keyField.value = savedKey;
+  
+  if(!savedKey) {
+    appendMsg('coach', '⚡ **Bem-vindo ao WodCoach v2!**\n\nPara ativar o coach, vá na aba **⚙️ Config** e cole sua chave da API Anthropic. É rápido!', false);
   } else {
     showTyping();
     try {
-      const r = await callClaude('Olá! Sou o WodCoach v2. Me apresente brevemente e mencione as 3 integrações disponíveis: Strava OAuth, Apple Health e Tecnofit.');
+      const r = await callClaude('Olá! Me apresente brevemente como WodCoach e mencione as 3 integrações: Strava OAuth, Apple Health e Tecnofit.');
       removeTyping(); appendMsg('coach', r, true);
     } catch(e) {
       removeTyping();
-      saveApiKey('');
-      showApiKeySetup();
-      appendMsg('coach', '⚠️ Chave inválida. Cole sua chave novamente acima.', false);
+      appendMsg('coach', '⚠️ Chave inválida ou expirada. Vá em **⚙️ Config** e atualize sua chave.', false);
     }
   }
 }
