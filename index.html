@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WodCoach v2 — Integrations</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080810;
+  --surface: #0f0f1a;
+  --card: #141420;
+  --card2: #1a1a28;
+  --border: #252535;
+  --border2: #333348;
+  --accent: #e8ff47;
+  --orange: #ff6b35;
+  --blue: #3d9bff;
+  --green: #3dff8f;
+  --red: #ff3d6b;
+  --text: #eeeef5;
+  --muted: #6868a0;
+  --muted2: #9090b8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 50% 35% at 85% 5%, rgba(232,255,71,.05) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 40% at 5% 95%, rgba(61,155,255,.04) 0%, transparent 65%),
+    radial-gradient(ellipse 25% 25% at 50% 50%, rgba(255,107,53,.025) 0%, transparent 65%);
+  pointer-events:none; z-index:0;
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+header {
+  position:relative; z-index:20;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(8,8,16,.92);
+  backdrop-filter:blur(16px);
+}
+
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-mark {
+  width:34px; height:34px;
+  background:var(--accent);
+  border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; font-weight:700; color:#080810;
+}
+.logo-text {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px; letter-spacing:3px;
+}
+.logo-text span { color:var(--accent); }
+.logo-version {
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px; color:var(--muted);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:4px; padding:2px 6px;
+}
+
+.header-right { display:flex; align-items:center; gap:12px; }
+.status-pill {
+  display:flex; align-items:center; gap:6px;
+  font-size:11px; color:var(--muted2);
+  font-family:'JetBrains Mono',monospace;
+}
+.dot { width:7px; height:7px; border-radius:50%; animation:blink 2s infinite; }
+.dot.green { background:var(--green); }
+.dot.orange { background:var(--orange); }
+.dot.muted { background:var(--muted); animation:none; }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── TABS ────────────────────────────────────────────── */
+.tabs {
+  position:relative; z-index:10;
+  display:flex; gap:0;
+  border-bottom:1px solid var(--border);
+  background:rgba(8,8,16,.7);
+  backdrop-filter:blur(8px);
+  overflow-x:auto; scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar { display:none; }
+
+.tab {
+  display:flex; align-items:center; gap:8px;
+  padding:12px 20px;
+  font-size:13px; font-weight:500;
+  color:var(--muted); cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:all .2s; white-space:nowrap;
+  background:transparent; border-top:none; border-left:none; border-right:none;
+}
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-icon { font-size:15px; }
+.tab-badge {
+  font-size:10px; font-family:'JetBrains Mono',monospace;
+  background:var(--orange); color:#fff;
+  border-radius:10px; padding:1px 6px;
+}
+
+/* ── PANELS ──────────────────────────────────────────── */
+.panel { display:none; flex:1; overflow-y:auto; }
+.panel.active { display:flex; flex-direction:column; }
+
+/* ── CHAT PANEL ──────────────────────────────────────── */
+#chat-messages {
+  flex:1; overflow-y:auto; padding:24px;
+  display:flex; flex-direction:column; gap:18px;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+#chat-messages::-webkit-scrollbar { width:3px; }
+#chat-messages::-webkit-scrollbar-thumb { background:var(--border); }
+
+.message { display:flex; gap:10px; animation:fadeUp .3s ease; max-width:820px; }
+.message.user { flex-direction:row-reverse; align-self:flex-end; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.avatar {
+  width:32px; height:32px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+}
+.avatar.coach { background:linear-gradient(135deg,var(--accent) 0%,#a8cc00 100%); }
+.avatar.user { background:var(--card); border:1px solid var(--border); }
+
+.bubble {
+  max-width:680px; padding:12px 16px;
+  border-radius:12px; line-height:1.65; font-size:14px;
+}
+.message.coach .bubble {
+  background:var(--card); border:1px solid var(--border);
+  border-top-left-radius:3px;
+}
+.message.user .bubble {
+  background:var(--card2); border:1px solid rgba(232,255,71,.12);
+  border-top-right-radius:3px;
+}
+
+.bubble-tag { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; }
+.bubble strong { color:var(--accent); }
+.bubble em { color:var(--blue); font-style:normal; font-weight:500; }
+.bubble .highlight { color:var(--green); font-weight:600; }
+.bubble .warn { color:var(--orange); }
+
+.typing-dots { display:flex; gap:4px; align-items:center; padding:4px 0; }
+.typing-dots span { width:6px; height:6px; background:var(--accent); border-radius:50%; animation:bounce 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay:.2s; }
+.typing-dots span:nth-child(3) { animation-delay:.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-7px);opacity:1} }
+
+.quick-actions { display:flex; gap:7px; flex-wrap:wrap; margin-top:8px; }
+.quick-btn {
+  background:var(--card); border:1px solid var(--border);
+  color:var(--muted2); padding:6px 13px; border-radius:20px;
+  font-size:12px; cursor:pointer; font-family:'DM Sans',sans-serif;
+  transition:all .2s;
+}
+.quick-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(232,255,71,.05); }
+
+.input-area {
+  padding:14px 24px 18px;
+  background:rgba(8,8,16,.95);
+  border-top:1px solid var(--border);
+}
+.input-row { display:flex; gap:10px; align-items:flex-end; }
+.input-box {
+  flex:1; background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:11px 15px; color:var(--text);
+  font-family:'DM Sans',sans-serif; font-size:14px;
+  resize:none; min-height:44px; max-height:150px; outline:none;
+  transition:border-color .2s; line-height:1.5;
+}
+.input-box:focus { border-color:rgba(232,255,71,.35); }
+.input-box::placeholder { color:var(--muted); }
+
+.send-btn {
+  width:44px; height:44px; background:var(--accent);
+  border:none; border-radius:10px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s; flex-shrink:0;
+}
+.send-btn:hover { background:#d4ea30; transform:scale(1.04); }
+.send-btn:disabled { background:var(--border); cursor:not-allowed; transform:none; }
+.send-btn svg { width:18px; height:18px; fill:#080810; }
+
+/* ── STRAVA PANEL ────────────────────────────────────── */
+.integration-panel { padding:28px; max-width:680px; width:100%; margin:0 auto; }
+.integration-panel h2 {
+  font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; margin-bottom:6px;
+}
+.integration-panel .subtitle { color:var(--muted2); font-size:14px; margin-bottom:28px; line-height:1.6; }
+
+.integration-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:24px; margin-bottom:20px;
+}
+.integration-card-header {
+  display:flex; align-items:center; gap:14px; margin-bottom:20px;
+}
+.int-logo {
+  width:48px; height:48px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+}
+.int-logo.strava { background:rgba(255,107,53,.15); border:1px solid rgba(255,107,53,.3); }
+.int-logo.apple { background:rgba(61,255,143,.1); border:1px solid rgba(61,255,143,.25); }
+.int-logo.tecnofit { background:rgba(61,155,255,.1); border:1px solid rgba(61,155,255,.25); }
+
+.int-info h3 { font-size:17px; font-weight:600; margin-bottom:3px; }
+.int-info p { font-size:12px; color:var(--muted2); }
+
+.form-label {
+  display:block; font-family:'JetBrains Mono',monospace;
+  font-size:11px; color:var(--muted); text-transform:uppercase;
+  letter-spacing:1px; margin-bottom:7px;
+}
+.form-input {
+  width:100%; background:var(--surface); border:1px solid var(--border);
+  border-radius:9px; padding:10px 13px; color:var(--text);
+  font-family:'JetBrains Mono',monospace; font-size:13px; outline:none;
+  transition:border-color .2s; margin-bottom:14px;
+}
+.form-input:focus { border-color:rgba(232,255,71,.35); }
+.form-input::placeholder { color:var(--muted); }
+
+.form-textarea {
+  width:100%; background:var(--surface); border:1px solid var(--border);
+  border-radius:9px; padding:10px 13px; color:var(--text);
+  font-family:'DM Sans',sans-serif; font-size:13.5px; outline:none;
+  resize:vertical; min-height:120px; line-height:1.6;
+  transition:border-color .2s; margin-bottom:14px;
+}
+.form-textarea:focus { border-color:rgba(61,155,255,.4); }
+.form-textarea::placeholder { color:var(--muted); }
+
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:11px 20px; border-radius:10px;
+  font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px;
+  cursor:pointer; transition:all .2s; border:none;
+}
+.btn-accent { background:var(--accent); color:#080810; }
+.btn-accent:hover { background:#d4ea30; }
+.btn-orange { background:var(--orange); color:#fff; }
+.btn-orange:hover { background:#e85520; }
+.btn-blue { background:var(--blue); color:#fff; }
+.btn-blue:hover { background:#2a88ee; }
+.btn-outline {
+  background:transparent; color:var(--muted2);
+  border:1px solid var(--border);
+}
+.btn-outline:hover { color:var(--text); border-color:var(--border2); }
+.btn-full { width:100%; justify-content:center; }
+.btn-sm { padding:7px 14px; font-size:12.5px; }
+
+.connected-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(61,255,143,.1); border:1px solid rgba(61,255,143,.25);
+  color:var(--green); border-radius:20px;
+  padding:4px 12px; font-size:12px; font-weight:500;
+}
+
+.activity-list { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+.activity-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:14px 16px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.activity-item-left { display:flex; flex-direction:column; gap:3px; }
+.activity-name { font-weight:600; font-size:14px; }
+.activity-meta { font-size:12px; color:var(--muted2); font-family:'JetBrains Mono',monospace; }
+.activity-stats { display:flex; gap:16px; }
+.stat { text-align:right; }
+.stat-value { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:1px; }
+.stat-value.orange { color:var(--orange); }
+.stat-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+
+.info-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:16px; margin-bottom:18px;
+  font-size:13px; line-height:1.65; color:var(--muted2);
+}
+.info-box strong { color:var(--text); }
+.info-box .step {
+  display:flex; gap:10px; margin-bottom:8px; align-items:flex-start;
+}
+.step-num {
+  background:var(--accent); color:#080810;
+  font-family:'Bebas Neue',sans-serif; font-size:14px;
+  width:22px; height:22px; border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; margin-top:1px;
+}
+.info-box a { color:var(--blue); text-decoration:none; }
+.info-box a:hover { text-decoration:underline; }
+
+.parsed-result {
+  background:rgba(61,255,143,.06); border:1px solid rgba(61,255,143,.2);
+  border-radius:10px; padding:16px; margin-top:12px; display:none;
+}
+.parsed-result h4 { color:var(--green); font-size:13px; margin-bottom:10px; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:1px; }
+.parsed-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.parsed-item { display:flex; flex-direction:column; gap:2px; }
+.parsed-key { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+.parsed-val { font-size:14px; font-weight:600; }
+
+.shortcut-card {
+  background:linear-gradient(135deg, rgba(61,255,143,.08) 0%, rgba(61,155,255,.05) 100%);
+  border:1px solid rgba(61,255,143,.2);
+  border-radius:12px; padding:20px; margin-bottom:16px;
+}
+.shortcut-card h4 { font-size:15px; font-weight:600; margin-bottom:6px; color:var(--green); }
+.shortcut-card p { font-size:13px; color:var(--muted2); line-height:1.6; }
+
+.code-block {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:9px; padding:16px;
+  font-family:'JetBrains Mono',monospace; font-size:12px;
+  color:var(--muted2); line-height:1.8; overflow-x:auto;
+  margin:12px 0;
+}
+.code-block .kw { color:var(--accent); }
+.code-block .str { color:var(--green); }
+.code-block .cm { color:var(--muted); font-style:italic; }
+
+.divider {
+  display:flex; align-items:center; gap:12px;
+  margin:20px 0; color:var(--muted); font-size:12px;
+}
+.divider::before, .divider::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--card2); border:1px solid var(--border2);
+  border-radius:10px; padding:12px 20px;
+  font-size:13.5px; font-weight:500;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  z-index:1000; display:flex; align-items:center; gap:8px;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.success { border-color:rgba(61,255,143,.4); color:var(--green); }
+.toast.error { border-color:rgba(255,61,107,.4); color:var(--red); }
+
+/* ── SCROLLBAR ───────────────────────────────────────── */
+.panel { scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+.panel::-webkit-scrollbar { width:4px; }
+.panel::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+@media (max-width:600px) {
+  .integration-panel { padding:16px; }
+  .form-row { grid-template-columns:1fr; }
+  .parsed-grid { grid-template-columns:1fr; }
+  .activity-stats { gap:10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">⚡</div>
+    <div class="logo-text">WOD<span>COACH</span></div>
+    <div class="logo-version">v2.0</div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill" id="strava-status">
+      <div class="dot muted" id="strava-dot"></div>
+      <span id="strava-label">Strava desconectado</span>
+    </div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('chat')" id="tab-chat">
+    <span class="tab-icon">💬</span> Coach IA
+  </button>
+  <button class="tab" onclick="switchTab('strava')" id="tab-strava">
+    <span class="tab-icon">🟠</span> Strava OAuth
+  </button>
+  <button class="tab" onclick="switchTab('apple')" id="tab-apple">
+    <span class="tab-icon">🍎</span> Apple Health
+  </button>
+  <button class="tab" onclick="switchTab('tecnofit')" id="tab-tecnofit">
+    <span class="tab-icon">🏋️</span> Tecnofit
+  </button>
+</div>
+
+<!-- ══════════════ CHAT PANEL ══════════════ -->
+<div class="panel active" id="panel-chat">
+  <div id="chat-messages"></div>
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="user-input" class="input-box" rows="1"
+        placeholder="Pergunte ao seu coach... (Ex: Como foi meu desempenho essa semana?)"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ STRAVA PANEL ══════════════ -->
+<div class="panel" id="panel-strava">
+  <div class="integration-panel">
+    <h2>🟠 Strava OAuth</h2>
+    <p class="subtitle">Conecte sua conta Strava para importar atividades automaticamente. Você precisa criar um app gratuito em strava.com/settings/api primeiro.</p>
+
+    <!-- Step-by-step setup -->
+    <div class="info-box" id="strava-setup-guide">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>Acesse <a href="https://www.strava.com/settings/api" target="_blank">strava.com/settings/api</a> e crie um app. Em <strong>Authorization Callback Domain</strong> coloque: <strong>localhost</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>Copie seu <strong>Client ID</strong> e <strong>Client Secret</strong> e cole abaixo</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>Clique em <strong>Conectar com Strava</strong> — você será redirecionado para autorizar o acesso</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>Após autorizar, cole o <strong>código de autorização</strong> da URL de retorno para obter seu token</div>
+      </div>
+    </div>
+
+    <div class="integration-card" id="strava-connect-card">
+      <div class="integration-card-header">
+        <div class="int-logo strava">🟠</div>
+        <div class="int-info">
+          <h3>Strava API</h3>
+          <p>OAuth 2.0 — Atividades, FC, distância, segmentos</p>
+        </div>
+      </div>
+
+      <div id="strava-auth-form">
+        <label class="form-label">Client ID</label>
+        <input class="form-input" id="strava-client-id" placeholder="Ex: 123456" type="text">
+
+        <label class="form-label">Client Secret</label>
+        <input class="form-input" id="strava-client-secret" placeholder="Ex: a1b2c3d4e5f6..." type="password">
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-orange" onclick="stravaAuthorize()">🔗 Conectar com Strava</button>
+        </div>
+      </div>
+
+      <div id="strava-code-form" style="display:none;">
+        <label class="form-label">Código de autorização (da URL após redirect)</label>
+        <input class="form-input" id="strava-auth-code" placeholder="Cole o código aqui (parâmetro ?code=...)">
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-accent" onclick="stravaExchangeToken()">✅ Trocar por Token</button>
+          <button class="btn btn-outline" onclick="resetStravaForm()">↩ Voltar</button>
+        </div>
+      </div>
+
+      <div id="strava-connected" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div class="connected-badge">✓ Conectado</div>
+          <button class="btn btn-outline btn-sm" onclick="stravaDisconnect()">Desconectar</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="btn btn-orange btn-sm" onclick="stravaFetchActivities()">🔄 Buscar atividades recentes</button>
+          <button class="btn btn-outline btn-sm" onclick="stravaFetchActivities(true)">📅 Últimas 4 semanas</button>
+        </div>
+        <div id="strava-activities" class="activity-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APPLE HEALTH PANEL ══════════════ -->
+<div class="panel" id="panel-apple">
+  <div class="integration-panel">
+    <h2>🍎 Apple Health</h2>
+    <p class="subtitle">Como o Apple Health não tem API web por privacidade, use um Atalho do iOS para enviar seus dados de sono e FC diretamente ao WodCoach.</p>
+
+    <div class="shortcut-card">
+      <h4>📱 Opção 1 — Atalho iOS (Recomendado)</h4>
+      <p>Crie um atalho que lê seus dados de sono e FC do Apple Health e os envia ao coach com um toque. Veja as instruções abaixo para configurar.</p>
+    </div>
+
+    <div class="integration-card">
+      <div class="integration-card-header">
+        <div class="int-logo apple">🌙</div>
+        <div class="int-info">
+          <h3>Configurar Atalho iOS</h3>
+          <p>App Atalhos → Automação ou execução manual</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Como criar o atalho no iPhone:</strong><br><br>
+        <div class="step"><div class="step-num">1</div><div>Abra o app <strong>Atalhos</strong> no iPhone e toque em <strong>"+"</strong> para criar novo</div></div>
+        <div class="step"><div class="step-num">2</div><div>Adicione ação: <strong>"Encontrar amostras de saúde"</strong> → Sono (ou Frequência Cardíaca)</div></div>
+        <div class="step"><div class="step-num">3</div><div>Adicione ação: <strong>"Obter detalhes"</strong> para extrair duração, início, fim</div></div>
+        <div class="step"><div class="step-num">4</div><div>Use a ação <strong>"Texto"</strong> para formatar: <em>Sono: [duração] | Início: [hora] | Fim: [hora]</em></div></div>
+        <div class="step"><div class="step-num">5</div><div>Copie o texto e cole no campo abaixo, ou configure para <strong>copiar automaticamente</strong> para a área de transferência</div></div>
+      </div>
+
+      <div class="divider">ou cole manualmente abaixo</div>
+
+      <label class="form-label">Cole os dados do Apple Health aqui</label>
+      <textarea class="form-textarea" id="apple-paste" placeholder="Exemplos aceitos:
+• Sono: 7h 23min | Início: 23:15 | Fim: 06:38 | Profundo: 1h 45min | REM: 2h 10min
+• FC repouso: 52bpm | FC média: 68bpm | Variabilidade: 48ms
+• Passos: 8.432 | Calorias ativas: 620kcal | Tempo em pé: 11h"></textarea>
+
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-accent btn-full" onclick="parseAppleHealth()">🔍 Analisar e Enviar ao Coach</button>
+      </div>
+
+      <div class="parsed-result" id="apple-parsed">
+        <h4>✓ Dados extraídos</h4>
+        <div class="parsed-grid" id="apple-parsed-grid"></div>
+      </div>
+    </div>
+
+    <div class="integration-card">
+      <div class="integration-card-header">
+        <div class="int-logo apple">📤</div>
+        <div class="int-info">
+          <h3>Exportar XML do Apple Health</h3>
+          <p>Histórico completo de saúde em formato XML</p>
+        </div>
+      </div>
+      <div class="info-box">
+        <strong>Para exportar seu histórico completo:</strong><br><br>
+        <div class="step"><div class="step-num">1</div><div>Abra o app <strong>Saúde</strong> no iPhone</div></div>
+        <div class="step"><div class="step-num">2</div><div>Toque na sua foto/inicial no canto superior direito</div></div>
+        <div class="step"><div class="step-num">3</div><div>Role até o fim e toque em <strong>"Exportar todos os dados de saúde"</strong></div></div>
+        <div class="step"><div class="step-num">4</div><div>Compartilhe o arquivo <strong>export.xml</strong> e cole os dados de sono relevantes no campo acima</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TECNOFIT PANEL ══════════════ -->
+<div class="panel" id="panel-tecnofit">
+  <div class="integration-panel">
+    <h2>🏋️ Tecnofit</h2>
+    <p class="subtitle">Cole o resultado do seu WOD do app Tecnofit Box. O coach vai extrair os dados automaticamente e analisar sua performance.</p>
+
+    <div class="integration-card">
+      <div class="integration-card-header">
+        <div class="int-logo tecnofit">📋</div>
+        <div class="int-info">
+          <h3>Importar resultado do WOD</h3>
+          <p>Cole o texto copiado do app Tecnofit Box</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>Como copiar do Tecnofit Box:</strong><br><br>
+        <div class="step"><div class="step-num">1</div><div>Abra o app <strong>Tecnofit Box</strong> e vá no WOD do dia</div></div>
+        <div class="step"><div class="step-num">2</div><div>Registre seu resultado normalmente</div></div>
+        <div class="step"><div class="step-num">3</div><div>Na tela de resultado, <strong>copie o texto</strong> (nome do WOD, movimentos, score, RX/Scale)</div></div>
+        <div class="step"><div class="step-num">4</div><div>Cole abaixo — o coach extrai tudo automaticamente</div></div>
+      </div>
+
+      <label class="form-label">Cole o resultado do Tecnofit Box</label>
+      <textarea class="form-textarea" id="tecnofit-paste" style="min-height:160px;"
+        placeholder="Exemplos aceitos (qualquer formato):
+
+WOD: Fran
+21-15-9 Thrusters 43kg + Pull-ups
+Resultado: 8:32 RX
+
+---
+
+Amanda
+9-7-5 Muscle-ups + Squat Snatches 61kg
+Scale: 8:45 (ring rows)
+Intensidade: alta
+
+---
+
+EMOM 20min
+Par: 5 Power Cleans 70kg
+Ímpar: 10 Box Jumps 60cm
+Resultado: completo, 18/20 rounds"></textarea>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-blue btn-full" onclick="parseTecnofit()">🤖 Analisar com IA e Enviar ao Coach</button>
+      </div>
+
+      <div class="parsed-result" id="tecnofit-parsed">
+        <h4>✓ Dados extraídos pelo coach</h4>
+        <div id="tecnofit-parsed-content"></div>
+      </div>
+    </div>
+
+    <div class="integration-card">
+      <div class="integration-card-header">
+        <div class="int-logo tecnofit">📊</div>
+        <div class="int-info">
+          <h3>Histórico de PRs</h3>
+          <p>Cole vários resultados de uma vez para análise histórica</p>
+        </div>
+      </div>
+      <label class="form-label">Cole múltiplos resultados (um por linha ou separados por ---)</label>
+      <textarea class="form-textarea" id="tecnofit-history" style="min-height:120px;"
+        placeholder="01/03 - Fran: 9:15 Scale&#10;08/03 - Fran: 8:47 Scale&#10;15/03 - Fran: 8:32 RX&#10;22/03 - Grace: 4:12 RX (30 clean & jerk 61kg)"></textarea>
+      <button class="btn btn-outline btn-full" style="margin-top:4px;" onclick="parseHistory()">📈 Analisar Evolução</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+const state = {
+  history: [],
+  athleteData: {
+    workouts: [], sleep: [], heartRate: [], strava: [], prs: [],
+    profile: {}
+  },
+  strava: {
+    clientId: '', clientSecret: '', accessToken: '', refreshToken: '',
+    athleteName: '', connected: false
+  }
+};
+
+// Persist Strava tokens
+function saveStravaState() {
+  localStorage.setItem('wc_strava', JSON.stringify(state.strava));
+}
+function loadStravaState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('wc_strava') || '{}');
+    if (s.accessToken) { Object.assign(state.strava, s); updateStravaUI(); }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════
+// CLAUDE API
+// ═══════════════════════════════════════════════
+function buildSystemPrompt() {
+  return `Você é WodCoach, coach de CrossFit com IA. Analisa dados de performance, sono, FC e histórico para feedbacks personalizados.
+
+DADOS DO ATLETA:
+${JSON.stringify(state.athleteData, null, 2)}
+
+STRAVA CONECTADO: ${state.strava.connected ? 'Sim, atleta: ' + state.strava.athleteName : 'Não'}
+
+SEU PAPEL:
+- Analisar padrões de treino, recuperação e evolução
+- Correlacionar sono, FC e performance no WOD
+- Dar feedback motivador e honesto, com dados concretos
+- Identificar overtraining ou subrecuperação
+- Celebrar PRs e marcos de evolução
+- Responda sempre em português do Brasil, de forma direta e energética
+- Máximo 4 parágrafos; use **negrito** para insights-chave`;
+}
+
+async function callClaude(userMsg) {
+  state.history.push({ role:'user', content:userMsg });
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system: buildSystemPrompt(),
+      messages: state.history
+    })
+  });
+  const d = await r.json();
+  const reply = d.content?.[0]?.text || 'Erro ao conectar com o coach.';
+  state.history.push({ role:'assistant', content:reply });
+  return reply;
+}
+
+// ═══════════════════════════════════════════════
+// CHAT UI
+// ═══════════════════════════════════════════════
+function appendMsg(role, content, showQuick=false) {
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  const isCoach = role === 'coach';
+  const fmt = content
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/\n/g,'<br>');
+  div.innerHTML = `
+    <div class="avatar ${isCoach?'coach':'user'}">${isCoach?'⚡':'👤'}</div>
+    <div>
+      <div class="bubble">
+        <div class="bubble-tag">${isCoach?'WodCoach IA':'Você'}</div>
+        ${fmt}
+      </div>
+      ${showQuick && isCoach ? `<div class="quick-actions" style="margin-top:8px;">
+        <button class="quick-btn" onclick="quickAsk('Como está minha recuperação essa semana?')">📊 Recuperação</button>
+        <button class="quick-btn" onclick="quickAsk('Qual foi minha melhor performance recente?')">🏆 Melhor treino</button>
+        <button class="quick-btn" onclick="quickAsk('Devo treinar amanhã com base nos meus dados?')">🤔 Treinar amanhã?</button>
+        <button class="quick-btn" onclick="quickAsk('Resumo completo da semana com todos meus dados')">📅 Resumo semanal</button>
+      </div>` : ''}
+    </div>`;
+  c.appendChild(div);
+  c.scrollTop = c.scrollHeight;
+}
+
+function showTyping() {
+  const c = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className='message coach'; div.id='typing';
+  div.innerHTML=`<div class="avatar coach">⚡</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(div); c.scrollTop=c.scrollHeight;
+}
+function removeTyping() { document.getElementById('typing')?.remove(); }
+
+async function sendMessage() {
+  const inp = document.getElementById('user-input');
+  const txt = inp.value.trim(); if(!txt) return;
+  const btn = document.getElementById('send-btn');
+  btn.disabled=true; inp.value=''; inp.style.height='auto';
+  appendMsg('user', txt); showTyping();
+  try { const r = await callClaude(txt); removeTyping(); appendMsg('coach', r); }
+  catch(e) { removeTyping(); appendMsg('coach','⚠️ Não consegui conectar. Tente novamente.'); }
+  btn.disabled=false; inp.focus();
+}
+
+async function quickAsk(txt) {
+  document.getElementById('user-input').value=txt;
+  await sendMessage();
+}
+
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,150)+'px'; }
+
+// ═══════════════════════════════════════════════
+// STRAVA OAUTH
+// ═══════════════════════════════════════════════
+function stravaAuthorize() {
+  const cid = document.getElementById('strava-client-id').value.trim();
+  const cs  = document.getElementById('strava-client-secret').value.trim();
+  if(!cid || !cs) { showToast('Preencha Client ID e Client Secret','error'); return; }
+  state.strava.clientId = cid;
+  state.strava.clientSecret = cs;
+  const redirect = encodeURIComponent('http://localhost/exchange_token');
+  const url = `https://www.strava.com/oauth/authorize?client_id=${cid}&response_type=code&redirect_uri=${redirect}&approval_prompt=force&scope=activity:read_all,profile:read_all`;
+  window.open(url, '_blank');
+  document.getElementById('strava-auth-form').style.display='none';
+  document.getElementById('strava-code-form').style.display='block';
+}
+
+async function stravaExchangeToken() {
+  const code = document.getElementById('strava-auth-code').value.trim();
+  if(!code) { showToast('Cole o código de autorização','error'); return; }
+  showToast('Trocando código por token...','');
+  try {
+    const r = await fetch('https://www.strava.com/api/v3/oauth/token', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        client_id: state.strava.clientId,
+        client_secret: state.strava.clientSecret,
+        code, grant_type:'authorization_code'
+      })
+    });
+    const d = await r.json();
+    if(d.errors) throw new Error(d.message || 'Erro na autenticação');
+    state.strava.accessToken  = d.access_token;
+    state.strava.refreshToken = d.refresh_token;
+    state.strava.athleteName  = `${d.athlete?.firstname||''} ${d.athlete?.lastname||''}`.trim() || 'Atleta';
+    state.strava.connected    = true;
+    saveStravaState();
+    updateStravaUI();
+    showToast(`✓ Conectado como ${state.strava.athleteName}!`, 'success');
+    stravaFetchActivities();
+  } catch(e) {
+    showToast('Erro: ' + e.message, 'error');
+  }
+}
+
+async function stravaRefreshToken() {
+  const r = await fetch('https://www.strava.com/api/v3/oauth/token', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      client_id: state.strava.clientId,
+      client_secret: state.strava.clientSecret,
+      grant_type:'refresh_token',
+      refresh_token: state.strava.refreshToken
+    })
+  });
+  const d = await r.json();
+  if(d.access_token) {
+    state.strava.accessToken  = d.access_token;
+    state.strava.refreshToken = d.refresh_token;
+    saveStravaState();
+  }
+}
+
+async function stravaFetchActivities(fourWeeks=false) {
+  if(!state.strava.accessToken) return;
+  const el = document.getElementById('strava-activities');
+  el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0;">Buscando atividades...</div>';
+  try {
+    const after = fourWeeks ? Math.floor((Date.now()-28*86400000)/1000) : Math.floor((Date.now()-7*86400000)/1000);
+    const r = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=15`, {
+      headers:{ Authorization:`Bearer ${state.strava.accessToken}` }
+    });
+    if(r.status===401) { await stravaRefreshToken(); return stravaFetchActivities(fourWeeks); }
+    const acts = await r.json();
+    if(!acts.length) { el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0;">Nenhuma atividade no período.</div>'; return; }
+    state.athleteData.strava = acts.map(a=>({
+      name:a.name, type:a.sport_type, date:a.start_date_local?.slice(0,10),
+      distance:(a.distance/1000).toFixed(2)+'km',
+      duration:Math.round(a.moving_time/60)+'min',
+      avgHR:a.average_heartrate, maxHR:a.max_heartrate,
+      calories:a.calories, sufferScore:a.suffer_score,
+      elevGain:a.total_elevation_gain
+    }));
+    el.innerHTML='';
+    acts.slice(0,8).forEach(a=>{
+      const distKm = (a.distance/1000).toFixed(1);
+      const dur = Math.round(a.moving_time/60);
+      const date = a.start_date_local?.slice(0,10)||'';
+      el.innerHTML += `
+        <div class="activity-item">
+          <div class="activity-item-left">
+            <div class="activity-name">${a.name}</div>
+            <div class="activity-meta">${date} · ${a.sport_type}</div>
+          </div>
+          <div class="activity-stats">
+            <div class="stat"><div class="stat-value orange">${distKm}</div><div class="stat-label">km</div></div>
+            <div class="stat"><div class="stat-value orange">${dur}</div><div class="stat-label">min</div></div>
+            ${a.average_heartrate ? `<div class="stat"><div class="stat-value" style="color:var(--red)">${Math.round(a.average_heartrate)}</div><div class="stat-label">bpm</div></div>` : ''}
+          </div>
+        </div>`;
+    });
+    showToast(`✓ ${acts.length} atividades importadas!`, 'success');
+    // Auto-notify coach
+    const summary = acts.slice(0,5).map(a=>`${a.name} (${a.sport_type}, ${(a.distance/1000).toFixed(1)}km, ${Math.round(a.moving_time/60)}min${a.average_heartrate?', FC média '+Math.round(a.average_heartrate)+'bpm':''})`).join(' | ');
+    switchTab('chat');
+    document.getElementById('user-input').value = `Importei minhas atividades do Strava: ${summary}. Analise meu volume e carga da semana!`;
+    await sendMessage();
+  } catch(e) {
+    el.innerHTML=`<div style="color:var(--red);font-size:13px;">${e.message}</div>`;
+  }
+}
+
+function updateStravaUI() {
+  const connected = state.strava.connected && state.strava.accessToken;
+  document.getElementById('strava-auth-form').style.display    = connected ? 'none' : 'block';
+  document.getElementById('strava-code-form').style.display    = 'none';
+  document.getElementById('strava-connected').style.display    = connected ? 'block' : 'none';
+  document.getElementById('strava-dot').className              = 'dot ' + (connected ? 'orange' : 'muted');
+  document.getElementById('strava-label').textContent          = connected ? `Strava: ${state.strava.athleteName}` : 'Strava desconectado';
+}
+
+function stravaDisconnect() {
+  Object.assign(state.strava, { accessToken:'', refreshToken:'', connected:false, athleteName:'' });
+  saveStravaState(); updateStravaUI();
+  showToast('Strava desconectado.','');
+}
+
+function resetStravaForm() {
+  document.getElementById('strava-auth-form').style.display='block';
+  document.getElementById('strava-code-form').style.display='none';
+}
+
+// ═══════════════════════════════════════════════
+// APPLE HEALTH PARSER
+// ═══════════════════════════════════════════════
+function parseAppleHealth() {
+  const raw = document.getElementById('apple-paste').value.trim();
+  if(!raw) { showToast('Cole os dados do Apple Health primeiro','error'); return; }
+
+  // Extract known patterns
+  const extract = (patterns, text) => {
+    for(const p of patterns) {
+      const m = text.match(p);
+      if(m) return m[1]?.trim();
+    }
+    return null;
+  };
+
+  const sono     = extract([/sono[:\s]+([\dh\s\w]+)/i,/dormiu[:\s]+([\dh\s\w]+)/i,/sleep[:\s]+([\dh\s\w]+)/i], raw);
+  const profundo = extract([/profundo[:\s]+([\dh\s\w]+)/i,/deep[:\s]+([\dh\s\w]+)/i], raw);
+  const rem      = extract([/rem[:\s]+([\dh\s\w]+)/i], raw);
+  const inicio   = extract([/in[íi]cio[:\s]+([\d:h\w]+)/i,/dormiu às[:\s]+([\d:]+)/i], raw);
+  const fim      = extract([/fim[:\s]+([\d:h\w]+)/i,/acordou[:\s]+([\d:]+)/i], raw);
+  const fcRep    = extract([/fc\s*repouso[:\s]+([\d]+)/i,/repouso[:\s]+([\d]+)/i,/resting[:\s]+([\d]+)/i], raw);
+  const fcMed    = extract([/fc\s*m[eé]dia[:\s]+([\d]+)/i,/m[eé]dia[:\s]+([\d]+)/i,/average[:\s]+([\d]+)/i], raw);
+  const hrv      = extract([/variabilidade[:\s]+([\d]+)/i,/hrv[:\s]+([\d]+)/i], raw);
+  const passos   = extract([/passos[:\s]+([\d.,]+)/i,/steps[:\s]+([\d.,]+)/i], raw);
+  const calorias = extract([/calorias[:\s]+([\d.,]+)/i,/calories[:\s]+([\d.,]+)/i], raw);
+
+  const entry = { date: new Date().toISOString().split('T')[0], raw };
+  if(sono)     { entry.sleep = sono; state.athleteData.sleep.push({date:entry.date, hours:sono, deep:profundo, rem, start:inicio, end:fim}); }
+  if(fcRep||fcMed) state.athleteData.heartRate.push({date:entry.date, rhr:fcRep, avgHR:fcMed, hrv});
+
+  const grid = document.getElementById('apple-parsed-grid');
+  const items = [
+    ['Sono total', sono], ['Sono profundo', profundo], ['REM', rem],
+    ['Início', inicio], ['Fim', fim],
+    ['FC repouso', fcRep ? fcRep+'bpm' : null], ['FC média', fcMed ? fcMed+'bpm' : null],
+    ['HRV', hrv ? hrv+'ms' : null], ['Passos', passos], ['Calorias', calorias]
+  ].filter(([,v])=>v);
+
+  if(!items.length) { showToast('Não consegui extrair dados. Tente um formato mais claro.','error'); return; }
+
+  grid.innerHTML = items.map(([k,v])=>`
+    <div class="parsed-item">
+      <div class="parsed-key">${k}</div>
+      <div class="parsed-val">${v}</div>
+    </div>`).join('');
+  document.getElementById('apple-parsed').style.display='block';
+
+  const msg = `Dados do Apple Health:\n${items.map(([k,v])=>`${k}: ${v}`).join(' | ')}\nAnalise minha recuperação e qualidade do sono!`;
+  switchTab('chat');
+  setTimeout(()=>{ document.getElementById('user-input').value=msg; sendMessage(); }, 400);
+}
+
+// ═══════════════════════════════════════════════
+// TECNOFIT PARSER (IA-powered)
+// ═══════════════════════════════════════════════
+async function parseTecnofit() {
+  const raw = document.getElementById('tecnofit-paste').value.trim();
+  if(!raw) { showToast('Cole o resultado do Tecnofit primeiro','error'); return; }
+  showToast('Analisando com IA...','');
+
+  // Use Claude to extract structured data from the paste
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:500,
+        messages:[{ role:'user', content:`Extraia os dados deste resultado de CrossFit/Tecnofit Box e retorne APENAS JSON válido sem markdown:
+{"wod":"nome do WOD","movements":"movimentos e cargas","score":"resultado/tempo","category":"RX/Scale/Amador","date":"data se houver","notes":"observações"}
+
+TEXTO:
+${raw}` }]
+      })
+    });
+    const d = await r.json();
+    let parsed;
+    try {
+      const txt = d.content?.[0]?.text||'{}';
+      parsed = JSON.parse(txt.replace(/```json?|```/g,'').trim());
+    } catch { parsed = { wod:'WOD', movements:raw, score:'Ver texto', category:'—' }; }
+
+    state.athleteData.workouts.push({
+      date: parsed.date || new Date().toISOString().split('T')[0],
+      wod: parsed.wod, movements:parsed.movements,
+      score:parsed.score, category:parsed.category, raw
+    });
+
+    const content = document.getElementById('tecnofit-parsed-content');
+    content.innerHTML = `
+      <div class="parsed-grid">
+        <div class="parsed-item"><div class="parsed-key">WOD</div><div class="parsed-val">${parsed.wod||'—'}</div></div>
+        <div class="parsed-item"><div class="parsed-key">Categoria</div><div class="parsed-val" style="color:${parsed.category==='RX'?'var(--accent)':'var(--blue)'}">${parsed.category||'—'}</div></div>
+        <div class="parsed-item"><div class="parsed-key">Score</div><div class="parsed-val">${parsed.score||'—'}</div></div>
+        <div class="parsed-item"><div class="parsed-key">Movimentos</div><div class="parsed-val" style="font-size:12px">${parsed.movements||'—'}</div></div>
+      </div>`;
+    document.getElementById('tecnofit-parsed').style.display='block';
+
+    const msg = `WOD do Tecnofit Box: **${parsed.wod}** | ${parsed.movements} | Score: ${parsed.score} | ${parsed.category}. Analise minha performance nesse WOD e compare com meu histórico!`;
+    switchTab('chat');
+    setTimeout(()=>{ document.getElementById('user-input').value=msg; sendMessage(); }, 400);
+  } catch(e) {
+    showToast('Erro ao processar: '+e.message,'error');
+  }
+}
+
+async function parseHistory() {
+  const raw = document.getElementById('tecnofit-history').value.trim();
+  if(!raw) { showToast('Cole o histórico primeiro','error'); return; }
+  const msg = `Aqui está meu histórico de resultados do Tecnofit Box:\n${raw}\n\nAnalise minha evolução ao longo do tempo e me dê insights sobre minha progressão!`;
+  switchTab('chat');
+  document.getElementById('user-input').value=msg;
+  await sendMessage();
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className='toast show';
+  if(type) t.classList.add(type);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.className='toast',3000);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+async function init() {
+  loadStravaState();
+  showTyping();
+  try {
+    const r = await callClaude('Olá! Sou o WodCoach v2. Me apresente brevemente e mencione as 3 integrações disponíveis: Strava OAuth, Apple Health e Tecnofit.');
+    removeTyping(); appendMsg('coach', r, true);
+  } catch(e) {
+    removeTyping();
+    appendMsg('coach', '⚡ **WodCoach v2 online!**\n\nAgora com **3 integrações reais**: use as abas acima para conectar seu **Strava** via OAuth, importar dados do **Apple Health**, e colar resultados do **Tecnofit Box**.\n\nTudo vai diretamente pro coach para análise. Vamos começar! 💪', true);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
