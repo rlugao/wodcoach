@@ -774,9 +774,9 @@ SEU PAPEL:
 
 async function callClaude(userMsg) {
   state.history.push({ role:'user', content:userMsg });
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
+  const r = await fetch('https://wodcoach.onrender.com/api/claude', {
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key': getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514',
       max_tokens:1000,
@@ -871,7 +871,7 @@ async function stravaExchangeToken() {
   try {
     const r = await fetch('https://www.strava.com/api/v3/oauth/token', {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key': getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         client_id: state.strava.clientId,
         client_secret: state.strava.clientSecret,
@@ -896,7 +896,7 @@ async function stravaExchangeToken() {
 async function stravaRefreshToken() {
   const r = await fetch('https://www.strava.com/api/v3/oauth/token', {
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key': getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
       client_id: state.strava.clientId,
       client_secret: state.strava.clientSecret,
@@ -1044,9 +1044,9 @@ async function parseTecnofit() {
 
   // Use Claude to extract structured data from the paste
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch('https://wodcoach.onrender.com/api/claude', {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key': getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:500,
