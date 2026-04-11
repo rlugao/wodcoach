@@ -738,6 +738,11 @@ function loadStravaState() {
   try {
     const s = JSON.parse(localStorage.getItem('wc_strava') || '{}');
     if (s.accessToken) { Object.assign(state.strava, s); updateStravaUI(); }
+    // Restore credentials if available
+    const savedCid = localStorage.getItem('wc_strava_cid');
+    const savedCs = localStorage.getItem('wc_strava_cs');
+    if (savedCid) state.strava.clientId = savedCid;
+    if (savedCs) state.strava.clientSecret = savedCs;
   } catch(e) {}
 }
 
@@ -857,6 +862,8 @@ function stravaAuthorize() {
   if(!cid || !cs) { showToast('Preencha Client ID e Client Secret','error'); return; }
   state.strava.clientId = cid;
   state.strava.clientSecret = cs;
+  localStorage.setItem('wc_strava_cid', cid);
+  localStorage.setItem('wc_strava_cs', cs);
   const redirect = encodeURIComponent('https://rlugao.github.io/wodcoach');
   const url = `https://www.strava.com/oauth/authorize?client_id=${cid}&response_type=code&redirect_uri=${redirect}&approval_prompt=force&scope=activity:read_all,profile:read_all`;
   window.open(url, '_blank');
