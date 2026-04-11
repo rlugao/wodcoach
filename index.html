@@ -1183,7 +1183,28 @@ async function init() {
   }
 }
 
+
+// ─── Auto-capture Strava OAuth code from URL ─────────────────────────────────
+function checkUrlForStravaCode() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const scope = params.get('scope');
+  
+  if (code && scope && scope.includes('activity')) {
+    // Remove code from URL without reload
+    window.history.replaceState({}, document.title, window.location.pathname);
+    // Switch to strava tab and show code form
+    switchTab('strava');
+    document.getElementById('strava-auth-form').style.display = 'none';
+    document.getElementById('strava-code-form').style.display = 'block';
+    document.getElementById('strava-auth-code').value = code;
+    // Auto exchange token
+    setTimeout(() => stravaExchangeToken(), 500);
+  }
+}
+
 init();
+checkUrlForStravaCode();
 </script>
 </body>
 </html>
