@@ -440,7 +440,7 @@ header {
     <div class="info-box" id="strava-setup-guide">
       <div class="step">
         <div class="step-num">1</div>
-        <div>Acesse <a href="https://www.strava.com/settings/api" target="_blank">strava.com/settings/api</a> e crie um app. Em <strong>Authorization Callback Domain</strong> coloque: <strong>localhost</strong></div>
+        <div>Acesse <a href="https://www.strava.com/settings/api" target="_blank">strava.com/settings/api</a> e crie um app. Em <strong>Authorization Callback Domain</strong> coloque: <strong>rlugao.github.io</strong></div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
@@ -857,7 +857,7 @@ function stravaAuthorize() {
   if(!cid || !cs) { showToast('Preencha Client ID e Client Secret','error'); return; }
   state.strava.clientId = cid;
   state.strava.clientSecret = cs;
-  const redirect = encodeURIComponent('http://localhost/exchange_token');
+  const redirect = encodeURIComponent('https://rlugao.github.io/wodcoach');
   const url = `https://www.strava.com/oauth/authorize?client_id=${cid}&response_type=code&redirect_uri=${redirect}&approval_prompt=force&scope=activity:read_all,profile:read_all`;
   window.open(url, '_blank');
   document.getElementById('strava-auth-form').style.display='none';
