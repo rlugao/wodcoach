@@ -876,7 +876,7 @@ async function stravaExchangeToken() {
   if(!code) { showToast('Cole o código de autorização','error'); return; }
   showToast('Trocando código por token...','');
   try {
-    const r = await fetch('https://www.strava.com/api/v3/oauth/token', {
+    const r = await fetch('https://wodcoach.onrender.com/api/strava/token', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -901,7 +901,7 @@ async function stravaExchangeToken() {
 }
 
 async function stravaRefreshToken() {
-  const r = await fetch('https://www.strava.com/api/v3/oauth/token', {
+  const r = await fetch('https://wodcoach.onrender.com/api/strava/token', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
